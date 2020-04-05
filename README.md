@@ -11,11 +11,6 @@ Refer to [NLink document](http://ftp.nooploop.com/software/products/uwb/doc/NLin
 
 The source code is released under a [BSD 3-Clause license](LICENSE).
 
-**Author: Samuel Hsu<br />
-Affiliation: [Nooploop](https://www.nooploop.com/)<br />
-Maintainer: Samuel Hsu, nooploop.studio@gmail.com**
-
-
 ## Bugs & Feature Requests
 
 Please report bugs and request features using the [Issue Tracker](https://github.com/NooploopStudio/nlink_unpack/issues).
