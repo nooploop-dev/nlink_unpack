@@ -1,39 +1,40 @@
-﻿#include "nlink_tofsense_frame0.h"
+#include "nlink_tofsense_frame0.h"
+
 #include "nlink_utils.h"
 
-NPACKED(
-    typedef struct {
-        uint8_t header[2];
-        uint8_t reserved0;
-        uint8_t id;
-        uint32_t systemTime;
-        NInt24 distance;
-        uint8_t distanceStatus;
-        uint16_t signalStrength;
-        uint8_t reserved1;
-        uint8_t checkSum;
-    }) NLink_TOFSense_Frame0_Raw;
+NLINK_PACKED(typedef struct {
+  uint8_t header[2];
+  uint8_t reserved0;
+  uint8_t id;
+  uint32_t system_time;
+  nint24_t dis;
+  uint8_t dis_status;
+  uint16_t signal_strength;
+  uint8_t reserved1;
+  uint8_t check_sum;
+})
+nts_frame0_raw_t;
 
-static NLink_TOFSense_Frame0_Raw frame_;
+static nts_frame0_raw_t g_frame;
 
-static uint8_t unpackData(const uint8_t *data, size_t dataLength) {
-    assert(ntsFrame0_.kFixedFrameLength == 16);
-    if(dataLength < ntsFrame0_.kFixedFrameLength || data[0] != ntsFrame0_.kFrameHeader || data[1] != ntsFrame0_.kFunctionMark) return 0;
-    if(!verifyCheckSum(data,ntsFrame0_.kFixedFrameLength)) return 0;
+static uint8_t UnpackData(const uint8_t *data, size_t data_length) {
+  if (data_length < g_nts_frame0.fixed_part_size ||
+      data[0] != g_nts_frame0.frame_header ||
+      data[1] != g_nts_frame0.function_mark)
+    return 0;
+  if (!NLINK_VerifyCheckSum(data, g_nts_frame0.fixed_part_size)) return 0;
 
-    memcpy(&frame_, data, ntsFrame0_.kFixedFrameLength);
-    ntsFrame0_.data.id =frame_.id;
-    ntsFrame0_.data.systemTime =frame_.systemTime;
-    ntsFrame0_.data.distanceStatus =frame_.distanceStatus;
-    ntsFrame0_.data.signalStrength =frame_.signalStrength;
-    ntsFrame0_.data.distance =int24Value(frame_.distance)/1000.0f;
+  memcpy(&g_frame, data, g_nts_frame0.fixed_part_size);
+  g_nts_frame0.result.id = g_frame.id;
+  g_nts_frame0.result.system_time = g_frame.system_time;
+  g_nts_frame0.result.dis_status = g_frame.dis_status;
+  g_nts_frame0.result.signal_strength = g_frame.signal_strength;
+  g_nts_frame0.result.dis = NLINK_ParseInt24(g_frame.dis) / 1000.0f;
 
-    return 1;
+  return 1;
 }
 
-NLink_TOFSense_Frame0 ntsFrame0_ = {
-    .kFixedFrameLength = 16,
-    .kFrameHeader = 0x57,
-    .kFunctionMark = 0x00,
-    .unpackData = unpackData
-};
+nts_frame0_t g_nts_frame0 = {.fixed_part_size = 16,
+                             .frame_header = 0x57,
+                             .function_mark = 0x00,
+                             .UnpackData = UnpackData};

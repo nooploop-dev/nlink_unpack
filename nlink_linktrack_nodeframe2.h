@@ -1,46 +1,48 @@
-﻿#ifndef NLINK_LINKTRACK_NODE_FRAME2_H
-#define NLINK_LINKTRACK_NODE_FRAME2_H
+#ifndef NLINK_LINKTRACK_NODEFRAME2_H
+#define NLINK_LINKTRACK_NODEFRAME2_H
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include <stddef.h>
-#include <stdint.h>
+#include "nlink_typedef.h"
 
 typedef struct {
-  uint8_t role;
+  linktrack_role_e role;
   uint8_t id;
   float dis;
-  float fpRssi;
-  float rxRssi;
-} NLink_LinkTrack_Node2;
+  float fp_rssi;
+  float rx_rssi;
+} nlt_nodeframe2_node_t;
 
 typedef struct {
-  const size_t kFixedFrameLength;
-  const uint8_t kFrameHeader;
-  const uint8_t kFunctionMark;
-  struct {
-    uint8_t role;
-    uint8_t id;
-    uint32_t localTime;
-    uint32_t systemTime;
-    float voltage;
-    float pos[3];
-    float eop[3];
-    float vel[3];
-    float angle[3];
-    float q[4];
-    float imuGyro[3];
-    float imuAcc[3];
-    uint8_t validNodeCount;
-    NLink_LinkTrack_Node2 *node[256];
-  } data;
+  linktrack_role_e role;
+  uint8_t id;
+  uint32_t local_time;
+  uint32_t system_time;
+  float voltage;
+  float pos_3d[3];
+  float eop_3d[3];
+  float vel_3d[3];
+  float angle_3d[3];
+  float quaternion[4];
+  float imu_gyro_3d[3];
+  float imu_acc_3d[3];
+  uint8_t valid_node_count;
+  nlt_nodeframe2_node_t *nodes[256];
+} nlt_nodeframe2_result_t;
 
-  uint8_t (*const unpackData)(const uint8_t *data, size_t dataLength);
-} NLink_LinkTrack_NodeFrame2;
+typedef struct {
+  const size_t fixed_part_size;
+  const uint8_t frame_header;
+  const uint8_t function_mark;
+  nlt_nodeframe2_result_t result;
 
-extern NLink_LinkTrack_NodeFrame2 nltNodeFrame2_;
+  uint8_t (*const UnpackData)(const uint8_t *data, size_t data_length);
+} nlt_nodeframe2_t;
+
+extern nlt_nodeframe2_t g_nlt_nodeframe2;
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif // NLINK_LINKTRACK_NODE_FRAME2_H
+#endif  // NLINK_LINKTRACK_NODEFRAME2_H

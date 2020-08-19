@@ -1,29 +1,30 @@
-﻿#ifndef NLINK_TOFSENSE_FRAME0_H
+#ifndef NLINK_TOFSENSE_FRAME0_H
 #define NLINK_TOFSENSE_FRAME0_H
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include <stddef.h>
-#include <stdint.h>
+#include "nlink_typedef.h"
 
 typedef struct {
-  const size_t kFixedFrameLength;
-  const uint8_t kFrameHeader;
-  const uint8_t kFunctionMark;
-  struct {
-    uint8_t id;
-    uint32_t systemTime;
-    float distance;
-    uint8_t distanceStatus;
-    uint16_t signalStrength;
-  } data;
+  uint8_t id;
+  uint32_t system_time;
+  float dis;
+  uint8_t dis_status;
+  uint16_t signal_strength;
+} nts_frame0_result_t;
 
-  uint8_t (*const unpackData)(const uint8_t *data, size_t dataLength);
-} NLink_TOFSense_Frame0;
+typedef struct {
+  const size_t fixed_part_size;
+  const uint8_t frame_header;
+  const uint8_t function_mark;
+  nts_frame0_result_t result;
 
-extern NLink_TOFSense_Frame0 ntsFrame0_;
+  uint8_t (*const UnpackData)(const uint8_t *data, size_t data_length);
+} nts_frame0_t;
+
+extern nts_frame0_t g_nts_frame0;
 
 #ifdef __cplusplus
 }
 #endif
-#endif // NLINK_TOFSENSE_FRAME0_H
+#endif  // NLINK_TOFSENSE_FRAME0_H

@@ -1,36 +1,37 @@
-﻿#ifndef NLINK_LINKTRACK_NODE_FRAME1_H
-#define NLINK_LINKTRACK_NODE_FRAME1_H
+#ifndef NLINK_LINKTRACK_NODEFRAME1_H
+#define NLINK_LINKTRACK_NODEFRAME1_H
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include <stddef.h>
-#include <stdint.h>
+#include "nlink_typedef.h"
 
 typedef struct {
-  uint8_t role;
+  linktrack_role_e role;
   uint8_t id;
-  float pos[3];
-} NLink_LinkTrack_Node1;
+  float pos_3d[3];
+} nlt_nodeframe1_node_t;
 
 typedef struct {
-  const size_t kFixedFrameLength;
-  const uint8_t kFrameHeader;
-  const uint8_t kFunctionMark;
-  struct {
-    uint8_t role;
-    uint8_t id;
-    uint32_t systemTime;
-    uint32_t localTime;
-    float voltage;
-    uint8_t validNodeCount;
-    NLink_LinkTrack_Node1 *node[256];
-  } data;
+  linktrack_role_e role;
+  uint8_t id;
+  uint32_t system_time;
+  uint32_t local_time;
+  float voltage;
+  uint8_t valid_node_count;
+  nlt_nodeframe1_node_t *nodes[256];
+} nlt_nodeframe1_result_t;
 
-  uint8_t (*const unpackData)(const uint8_t *data, size_t dataLength);
-} NLink_LinkTrack_NodeFrame1;
+typedef struct {
+  const size_t fixed_part_size;
+  const uint8_t frame_header;
+  const uint8_t function_mark;
+  nlt_nodeframe1_result_t result;
+  uint8_t (*const UnpackData)(const uint8_t *data, size_t data_length);
+} nlt_nodeframe1_t;
 
-extern NLink_LinkTrack_NodeFrame1 nltNodeFrame1_;
+extern nlt_nodeframe1_t g_nlt_nodeframe1;
+
 #ifdef __cplusplus
 }
 #endif
-#endif // NLINK_LINKTRACK_NODE_FRAME1_H
+#endif  // NLINK_LINKTRACK_NODEFRAME1_H

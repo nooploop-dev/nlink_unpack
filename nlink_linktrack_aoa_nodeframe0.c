@@ -1,85 +1,81 @@
-﻿#include "nlink_linktrack_aoa_nodeframe0.h"
+#include "nlink_linktrack_aoa_nodeframe0.h"
+
 #include "nlink_utils.h"
 
-NPACKED(
-    typedef struct {
-        uint8_t role;
-        uint8_t id;
-        NInt24 dis;
-        int16_t angle;
-        uint8_t fpRssi;
-        uint8_t rxRssi;
-        uint8_t reserved[2];
-    })
-Aoa_Node0_Raw;
+NLINK_PACKED(typedef struct {
+  uint8_t role;
+  uint8_t id;
+  nint24_t dis;
+  int16_t angle;
+  uint8_t fp_rssi;
+  uint8_t rx_rssi;
+  uint8_t reserved[2];
+})
+nltaoa_nodeframe0_node_raw_t;
 
-NPACKED(
-    typedef struct {
-        uint8_t header[2];
-        uint16_t frameLength;
-        uint8_t role;
-        uint8_t id;
-        uint32_t localTime;
-        uint32_t systemTime;
-        uint8_t reserved0[4];
-        uint16_t voltage;
-        uint8_t validNodeCount;
-        //nodes...
-        //uint8_t checkSum;
-    })
-NLink_LinkTrack_Aoa_Node_Frame0_Raw;
+NLINK_PACKED(typedef struct {
+  uint8_t header[2];
+  uint16_t frame_length;
+  uint8_t role;
+  uint8_t id;
+  uint32_t local_time;
+  uint32_t system_time;
+  uint8_t reserved0[4];
+  uint16_t voltage;
+  uint8_t valid_node_count;
+  // nodes...
+  // uint8_t checkSum;
+})
+nltaoa_nodeframe0_raw_t;
 
-static NLink_LinkTrack_Aoa_Node_Frame0_Raw frame_;
+static nltaoa_nodeframe0_raw_t g_frame;
 
-static uint8_t unpackData(const uint8_t *data, size_t dataLength)
-{
-    assert(nltAoaNodeFrame0_.kFixedFrameLength == sizeof(frame_));
-    if (dataLength < nltAoaNodeFrame0_.kFixedFrameLength || data[0] != nltAoaNodeFrame0_.kFrameHeader || data[1] != nltAoaNodeFrame0_.kFunctionMark)
-        return 0;
-    size_t frameLength = FRAME_LENGTH(data);
-    if (dataLength < frameLength)
-        return 0;
-    if (!verifyCheckSum(data, frameLength))
-        return 0;
+static uint8_t UnpackData(const uint8_t *data, size_t data_length) {
+  if (data_length < g_nltaoa_nodeframe0.fixed_part_size ||
+      data[0] != g_nltaoa_nodeframe0.frame_header ||
+      data[1] != g_nltaoa_nodeframe0.function_mark)
+    return 0;
+  size_t frame_length = NLINK_PROTOCOL_LENGTH(data);
+  if (data_length < frame_length) return 0;
+  if (!NLINK_VerifyCheckSum(data, frame_length)) return 0;
 
-    static uint8_t initNeeded = 1;
-    if (initNeeded)
-    {
-        memset(nltAoaNodeFrame0_.data.node, 0, sizeof(nltAoaNodeFrame0_.data.node));
-        initNeeded = 0;
-    }
+  static uint8_t init_needed = 1;
+  if (init_needed) {
+    memset(g_nltaoa_nodeframe0.result.nodes, 0,
+           sizeof(g_nltaoa_nodeframe0.result.nodes));
+    init_needed = 0;
+  }
 
-    memcpy(&frame_, data, nltAoaNodeFrame0_.kFixedFrameLength);
-    nltAoaNodeFrame0_.data.role = frame_.role;
-    nltAoaNodeFrame0_.data.id = frame_.id;
-    nltAoaNodeFrame0_.data.localTime = frame_.localTime;
-    nltAoaNodeFrame0_.data.systemTime = frame_.systemTime;
-    nltAoaNodeFrame0_.data.voltage = frame_.voltage / kVoltageMultiply_;
+  memcpy(&g_frame, data, g_nltaoa_nodeframe0.fixed_part_size);
+  g_nltaoa_nodeframe0.result.role = g_frame.role;
+  g_nltaoa_nodeframe0.result.id = g_frame.id;
+  g_nltaoa_nodeframe0.result.local_time = g_frame.local_time;
+  g_nltaoa_nodeframe0.result.system_time = g_frame.system_time;
+  g_nltaoa_nodeframe0.result.voltage = g_frame.voltage / MULTIPLY_VOLTAGE;
 
-    nltAoaNodeFrame0_.data.validNodeCount = frame_.validNodeCount;
-    Aoa_Node0_Raw rawNode;
-    for (size_t i = 0; i < frame_.validNodeCount; ++i)
-    {
-        if (!nltAoaNodeFrame0_.data.node[i])
-        {
-            nltAoaNodeFrame0_.data.node[i] = malloc(sizeof(NLink_LinkTrack_Aoa_Node0));
-        }
+  g_nltaoa_nodeframe0.result.valid_node_count = g_frame.valid_node_count;
+  nltaoa_nodeframe0_node_raw_t raw_node;
+  for (size_t i = 0; i < g_frame.valid_node_count; ++i) {
+    TRY_MALLOC_NEW_NODE(g_nltaoa_nodeframe0.result.nodes[i],
+                        nltaoa_nodeframe0_node_t)
 
-        memcpy(&rawNode, data + nltAoaNodeFrame0_.kFixedFrameLength + i * sizeof(Aoa_Node0_Raw), sizeof(Aoa_Node0_Raw));
+    memcpy(&raw_node,
+           data + g_nltaoa_nodeframe0.fixed_part_size +
+               i * sizeof(nltaoa_nodeframe0_node_raw_t),
+           sizeof(nltaoa_nodeframe0_node_raw_t));
 
-        NLink_LinkTrack_Aoa_Node0 *node = nltAoaNodeFrame0_.data.node[i];
-        node->role = rawNode.role;
-        node->id = rawNode.id;
-        node->dis = int24Value(rawNode.dis) / kDisMultiply_;
-        node->angle = rawNode.angle / kAngleMultiply_;
-        node->fpRssi = rawNode.fpRssi / kRssiMultiply_;
-        node->rxRssi = rawNode.rxRssi / kRssiMultiply_;
-    }
-    return 1;
+    nltaoa_nodeframe0_node_t *node = g_nltaoa_nodeframe0.result.nodes[i];
+    node->role = (linktrack_role_e)raw_node.role;
+    node->id = raw_node.id;
+    node->dis = NLINK_ParseInt24(raw_node.dis) / MULTIPLY_DIS;
+    node->angle = raw_node.angle / MULTIPLY_ANGLE;
+    node->fp_rssi = raw_node.fp_rssi / MULTIPLY_RSSI;
+    node->rx_rssi = raw_node.rx_rssi / MULTIPLY_RSSI;
+  }
+  return 1;
 }
 
-NLink_LinkTrack_Aoa_NodeFrame0 nltAoaNodeFrame0_ = {
-    .kFixedFrameLength = 21,
-    .kFrameHeader = 0x55,
-    .kFunctionMark = 0x07,
-    .unpackData = unpackData};
+nltaoa_nodeframe0_t g_nltaoa_nodeframe0 = {.fixed_part_size = 21,
+                                           .frame_header = 0x55,
+                                           .function_mark = 0x07,
+                                           .UnpackData = UnpackData};

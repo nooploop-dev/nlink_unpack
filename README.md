@@ -1,17 +1,30 @@
-![Logo of the project](http://ftp.nooploop.com/media/image/nooploop.png)
-# nlink_unpack
 
-## Overview
+简体中文 | [English](./README.en.md) 
 
-This package is developed for [LinkTrack](https://www.nooploop.com/) and [TOFSense](https://www.nooploop.com/tofsense) written in C, and there are no other dependency libraries.ROS package [nlink_parser](https://github.com/NooploopStudio/nlink_parser) is using this.
+<h1 align="center">NLink Unpack</h1>
 
-Refer to [NLink document](http://ftp.nooploop.com/software/products/uwb/doc/NLink_V1.3.pdf)
+<div align="center">
 
-### License
+![Logo](http://ftp.nooploop.com/media/image/nooploop.png)
 
-The source code is released under a [BSD 3-Clause license](LICENSE).
+NLink Unpack 用于支持Nooploop产品，如[LinkTrack](https://www.nooploop.com/)，[LinkTrack AOA](http://www.nooploop.com/linktrack-aoa)，[TOFSense](https://www.nooploop.com/tofsense)，纯C语言编写，用户可用于构建协议解析代码
 
-## Bugs & Feature Requests
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://dev.azure.com/ant-design/ant-design-pro/_build/latest?definitionId=1?branchName=master) ![Test Status](https://img.shields.io/badge/test-passing-brightgreen)
 
-Please report bugs and request features using the [Issue Tracker](https://github.com/NooploopStudio/nlink_unpack/issues).
+
+</div>
+
+## Notice
+- 如编译错误，请确保编译器已经开启C99支持
+- NLink协议数据遵循小端模式，本示例代码默认运行于小端模式，大端模式不可用
+- 对于变长协议，如NLink_LinkTrack_NodeFrame1，动态节点部分采用了堆内存分配，如节点数量较多，请确保堆空间足够
+
+## Usage
+
+使用示例参考[example.c](./example.c)文件
+
+## License
+
+源码基于[BSD 3-Clause license](LICENSE)发布
+
 

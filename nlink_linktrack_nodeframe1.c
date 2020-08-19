@@ -1,74 +1,75 @@
-﻿#include "nlink_linktrack_nodeframe1.h"
+#include "nlink_linktrack_nodeframe1.h"
+
 #include "nlink_utils.h"
 
-NPACKED(
-    typedef struct {
-        uint8_t role;
-        uint8_t id;
-        NInt24 pos[3];
-        uint8_t reserved[9];
-    }) Node1_Raw;
+NLINK_PACKED(typedef struct {
+  uint8_t role;
+  uint8_t id;
+  nint24_t pos_3d[3];
+  uint8_t reserved[9];
+})
+nlt_nodeframe1_node_raw_t;
 
-NPACKED(
-    typedef struct {
-        uint8_t header[2];
-        uint16_t frameLength;
-        uint8_t role;
-        uint8_t id;
-        uint32_t systemTime;
-        uint32_t localTime;
-        uint8_t reserved0[10];
-        uint16_t voltage;
+NLINK_PACKED(typedef struct {
+  uint8_t header[2];
+  uint16_t frame_length;
+  uint8_t role;
+  uint8_t id;
+  uint32_t system_time;
+  uint32_t local_time;
+  uint8_t reserved0[10];
+  uint16_t voltage;
 
-        uint8_t validNodeCount;
-        //nodes...
-        //uint8_t checkSum;
-    }) NLink_LinkTrack_Node_Frame1_Raw;
+  uint8_t valid_node_count;
+  // nodes...
+  // uint8_t checkSum;
+})
+nlt_nodeframe1_raw_t;
 
-static NLink_LinkTrack_Node_Frame1_Raw frame_;
+static nlt_nodeframe1_raw_t g_frame;
 
-static uint8_t unpackData(const uint8_t *data, size_t dataLength) {
-    assert(nltNodeFrame1_.kFixedFrameLength == sizeof (frame_));
-    if(dataLength < nltNodeFrame1_.kFixedFrameLength || data[0] != nltNodeFrame1_.kFrameHeader || data[1] != nltNodeFrame1_.kFunctionMark) return 0;
-    size_t frameLength = FRAME_LENGTH(data);
-    if(dataLength < frameLength) return 0;
-    if(!verifyCheckSum(data,frameLength)) return 0;
+static uint8_t UnpackData(const uint8_t *data, size_t data_length) {
+  if (data_length < g_nlt_nodeframe1.fixed_part_size ||
+      data[0] != g_nlt_nodeframe1.frame_header ||
+      data[1] != g_nlt_nodeframe1.function_mark)
+    return 0;
+  size_t frame_length = NLINK_PROTOCOL_LENGTH(data);
+  if (data_length < frame_length) return 0;
+  if (!NLINK_VerifyCheckSum(data, frame_length)) return 0;
 
+  static uint8_t init_needed = 1;
+  if (init_needed) {
+    memset(g_nlt_nodeframe1.result.nodes, 0,
+           sizeof(g_nlt_nodeframe1.result.nodes));
+    init_needed = 0;
+  }
 
-    static uint8_t initNeeded = 1;
-    if(initNeeded){
-        memset(nltNodeFrame1_.data.node,0,sizeof(nltNodeFrame1_.data.node));
-        initNeeded = 0;
-    }
+  memcpy(&g_frame, data, g_nlt_nodeframe1.fixed_part_size);
 
-    memcpy(&frame_, data, nltNodeFrame1_.kFixedFrameLength);
+  g_nlt_nodeframe1.result.id = g_frame.id;
+  g_nlt_nodeframe1.result.local_time = g_frame.local_time;
+  g_nlt_nodeframe1.result.system_time = g_frame.system_time;
+  g_nlt_nodeframe1.result.voltage = g_frame.voltage / MULTIPLY_VOLTAGE;
 
-    nltNodeFrame1_.data.id =frame_.id;
-    nltNodeFrame1_.data.localTime =frame_.localTime;
-    nltNodeFrame1_.data.systemTime =frame_.systemTime;
-    nltNodeFrame1_.data.voltage = frame_.voltage / kVoltageMultiply_;
+  g_nlt_nodeframe1.result.valid_node_count = g_frame.valid_node_count;
+  nlt_nodeframe1_node_raw_t raw_node;
+  for (size_t i = 0; i < g_frame.valid_node_count; ++i) {
+    TRY_MALLOC_NEW_NODE(g_nlt_nodeframe1.result.nodes[i], nlt_nodeframe1_node_t)
 
-    nltNodeFrame1_.data.validNodeCount = frame_.validNodeCount;
-    Node1_Raw rawNode;
-    for(size_t i=0;i<frame_.validNodeCount;++i){
-        if(!nltNodeFrame1_.data.node[i]){
-            nltNodeFrame1_.data.node[i] = malloc( sizeof(NLink_LinkTrack_Node1) );
-        }
+    memcpy(&raw_node,
+           data + g_nlt_nodeframe1.fixed_part_size +
+               i * sizeof(nlt_nodeframe1_node_raw_t),
+           sizeof(nlt_nodeframe1_node_raw_t));
 
-        memcpy(&rawNode,data + nltNodeFrame1_.kFixedFrameLength + i*sizeof(Node1_Raw),sizeof(Node1_Raw));
-
-        NLink_LinkTrack_Node1 *node = nltNodeFrame1_.data.node[i];
-        node->role = rawNode.role;
-        node->id = rawNode.id;
-        TRANSFORM_ARRAY_INT24(node->pos,rawNode.pos,kPosMultiply_)
-    }
-    return 1;
+    nlt_nodeframe1_node_t *node = g_nlt_nodeframe1.result.nodes[i];
+    node->role = raw_node.role;
+    node->id = raw_node.id;
+    NLINK_TRANSFORM_ARRAY_INT24(node->pos_3d, raw_node.pos_3d, MULTIPLY_POS)
+  }
+  return 1;
 }
 
-NLink_LinkTrack_NodeFrame1 nltNodeFrame1_ = {
-    .kFixedFrameLength = 27,
-    .kFrameHeader = 0x55,
-    .kFunctionMark = 0x03,
-    .unpackData = unpackData
-};
-
+nlt_nodeframe1_t g_nlt_nodeframe1 = {.fixed_part_size = 27,
+                                     .frame_header = 0x55,
+                                     .function_mark = 0x03,
+                                     .UnpackData = UnpackData};

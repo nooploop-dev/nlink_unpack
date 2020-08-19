@@ -1,60 +1,67 @@
-﻿#include "nlink_linktrack_tagframe0.h"
+#include "nlink_linktrack_tagframe0.h"
+
 #include "nlink_utils.h"
 
-NPACKED(
-    typedef struct {
-        uint8_t header[2];
-        uint8_t id;
-        uint8_t role;
-        NInt24 pos[3];
-        NInt24 vel[3];
-        NInt24 dis[8];
-        float imuGyro[3];
-        float imuAcc[3];
-        uint8_t reserved1[12];
-        int16_t angle[3];
-        float q[4];
-        uint8_t reserved2[4];
-        uint32_t localTime;
-        uint32_t systemTime;
-        uint8_t reserved3[1];
-        uint8_t eop[3];
-        uint16_t voltage;
-        uint8_t reserved4[5];
-        uint8_t checkSum;
-    }) NLink_LinkTrack_TagFrame0_Raw;
+NLINK_PACKED(typedef struct {
+  uint8_t header[2];
+  uint8_t id;
+  uint8_t role;
+  nint24_t pos_3d[3];
+  nint24_t vel_3d[3];
+  nint24_t dis_arr[8];
+  float imu_gyro_3d[3];
+  float imu_acc_3d[3];
+  uint8_t reserved1[12];
+  int16_t angle_3d[3];
+  float quaternion[4];
+  uint8_t reserved2[4];
+  uint32_t local_time;
+  uint32_t system_time;
+  uint8_t reserved3[1];
+  uint8_t eop_3d[3];
+  uint16_t voltage;
+  uint8_t reserved4[5];
+  uint8_t check_sum;
+})
+nlt_tagframe0_raw_t;
 
-static NLink_LinkTrack_TagFrame0_Raw frame_;
+static nlt_tagframe0_raw_t g_frame;
 
-static uint8_t unpackData(const uint8_t *data,size_t dataLength) {
-    assert(nltTagFrame0_.kFixedFrameLength == sizeof (frame_));
-    if(dataLength < nltTagFrame0_.kFixedFrameLength || data[0] != nltTagFrame0_.kFrameHeader || data[1] != nltTagFrame0_.kFunctionMark) return 0;
-    if(!verifyCheckSum(data,nltTagFrame0_.kFixedFrameLength)) return 0;
+static uint8_t UnpackData(const uint8_t *data, size_t data_length) {
+  if (data_length < g_nlt_tagframe0.fixed_part_size ||
+      data[0] != g_nlt_tagframe0.frame_header ||
+      data[1] != g_nlt_tagframe0.function_mark)
+    return 0;
+  if (!NLINK_VerifyCheckSum(data, g_nlt_tagframe0.fixed_part_size)) return 0;
 
-    memcpy(&frame_, data, nltTagFrame0_.kFixedFrameLength);
-    nltTagFrame0_.data.role =frame_.role;
-    nltTagFrame0_.data.id =frame_.id;
-    nltTagFrame0_.data.localTime =frame_.localTime;
-    nltTagFrame0_.data.systemTime =frame_.systemTime;
-    nltTagFrame0_.data.voltage = frame_.voltage / kVoltageMultiply_;
+  memcpy(&g_frame, data, g_nlt_tagframe0.fixed_part_size);
+  g_nlt_tagframe0.result.role = g_frame.role;
+  g_nlt_tagframe0.result.id = g_frame.id;
+  g_nlt_tagframe0.result.local_time = g_frame.local_time;
+  g_nlt_tagframe0.result.system_time = g_frame.system_time;
+  g_nlt_tagframe0.result.voltage = g_frame.voltage / MULTIPLY_VOLTAGE;
 
-    TRANSFORM_ARRAY_INT24(nltTagFrame0_.data.pos,frame_.pos,kPosMultiply_)
-    TRANSFORM_ARRAY_INT24(nltTagFrame0_.data.vel,frame_.vel,kVelMultiply_)
-    TRANSFORM_ARRAY_INT24(nltTagFrame0_.data.dis,frame_.dis,kDisMultiply_)
-    TRANSFORM_ARRAY(nltTagFrame0_.data.imuGyro,frame_.imuGyro,1)
-    TRANSFORM_ARRAY(nltTagFrame0_.data.imuAcc,frame_.imuAcc,1)
-    TRANSFORM_ARRAY(nltTagFrame0_.data.q,frame_.q,1)
-    TRANSFORM_ARRAY(nltTagFrame0_.data.angle,frame_.angle,kAngleMultiply_)
-    TRANSFORM_ARRAY(nltTagFrame0_.data.eop,frame_.eop,kEopMultiply_)
+  NLINK_TRANSFORM_ARRAY_INT24(g_nlt_tagframe0.result.pos_3d, g_frame.pos_3d,
+                              MULTIPLY_POS)
+  NLINK_TRANSFORM_ARRAY_INT24(g_nlt_tagframe0.result.vel_3d, g_frame.vel_3d,
+                              MULTIPLY_VEL)
+  NLINK_TRANSFORM_ARRAY_INT24(g_nlt_tagframe0.result.dis_arr, g_frame.dis_arr,
+                              MULTIPLY_DIS)
+  NLINK_TRANSFORM_ARRAY(g_nlt_tagframe0.result.imu_gyro_3d, g_frame.imu_gyro_3d,
+                        1)
+  NLINK_TRANSFORM_ARRAY(g_nlt_tagframe0.result.imu_acc_3d, g_frame.imu_acc_3d,
+                        1)
+  NLINK_TRANSFORM_ARRAY(g_nlt_tagframe0.result.quaternion, g_frame.quaternion,
+                        1)
+  NLINK_TRANSFORM_ARRAY(g_nlt_tagframe0.result.angle_3d, g_frame.angle_3d,
+                        MULTIPLY_ANGLE)
+  NLINK_TRANSFORM_ARRAY(g_nlt_tagframe0.result.eop_3d, g_frame.eop_3d,
+                        MULTIPLY_EOP)
 
-    return 1;
+  return 1;
 }
 
-NLink_LinkTrack_TagFrame0 nltTagFrame0_ = {
-    .kFixedFrameLength = 128,
-    .kFrameHeader = 0x55,
-    .kFunctionMark = 0x01,
-    .unpackData = unpackData
-};
-
-
+nlt_tagframe0_t g_nlt_tagframe0 = {.fixed_part_size = 128,
+                                   .frame_header = 0x55,
+                                   .function_mark = 0x01,
+                                   .UnpackData = UnpackData};

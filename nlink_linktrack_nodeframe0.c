@@ -1,63 +1,71 @@
-﻿#include "nlink_linktrack_nodeframe0.h"
-#include "nlink_utils.h"
+#include "nlink_linktrack_nodeframe0.h"
+
 #include <stdio.h>
 
-NPACKED(
-    typedef struct {
-        uint8_t header[2];
-        uint16_t frameLength;
-        uint8_t role;
-        uint8_t id;
-        uint8_t reserved[4];
-        uint8_t validNodeCount;
-        //nodes...
-        //uint8_t checkSum;
-    }) NLink_LinkTrack_Node_Frame0_Raw;
+#include "nlink_utils.h"
 
-static NLink_LinkTrack_Node_Frame0_Raw frame_;
+NLINK_PACKED(typedef struct {
+  uint8_t header[2];
+  uint16_t frame_length;
+  uint8_t role;
+  uint8_t id;
+  uint8_t reserved[4];
+  uint8_t valid_node_count;
+  // nodes...
+  // uint8_t checkSum;
+})
+nlt_nodeframe0_raw_t;
 
-uint8_t unpackData(const uint8_t *data, size_t dataLength) {
-    assert(nltNodeFrame0_.kFixedFrameLength == sizeof (frame_));
-    if(dataLength < nltNodeFrame0_.kFixedFrameLength || data[0] != nltNodeFrame0_.kFrameHeader || data[1] != nltNodeFrame0_.kFunctionMark) return 0;
-    size_t frameLength = FRAME_LENGTH(data);
-    if(dataLength < frameLength) return 0;
-    if(!verifyCheckSum(data,frameLength)) return 0;
+static nlt_nodeframe0_raw_t g_frame;
 
-    static uint8_t initNeeded = 1;
-    if(initNeeded){
-        memset(nltNodeFrame0_.data.node,0,sizeof(nltNodeFrame0_.data.node));
-        initNeeded = 0;
+uint8_t UnpackData(const uint8_t *data, size_t data_length) {
+  if (data_length < g_nlt_nodeframe0.fixed_part_size ||
+      data[0] != g_nlt_nodeframe0.frame_header ||
+      data[1] != g_nlt_nodeframe0.function_mark)
+    return 0;
+  size_t frame_length = NLINK_PROTOCOL_LENGTH(data);
+  if (data_length < frame_length) return 0;
+  if (!NLINK_VerifyCheckSum(data, frame_length)) return 0;
+
+  static uint8_t init_needed = 1;
+  if (init_needed) {
+    memset(g_nlt_nodeframe0.result.nodes, 0,
+           sizeof(g_nlt_nodeframe0.result.nodes));
+    init_needed = 0;
+  }
+
+  memcpy(&g_frame, data, g_nlt_nodeframe0.fixed_part_size);
+  g_nlt_nodeframe0.result.role = g_frame.role;
+  g_nlt_nodeframe0.result.id = g_frame.id;
+  g_nlt_nodeframe0.result.valid_node_count = g_frame.valid_node_count;
+
+  for (size_t i = 0, address = g_nlt_nodeframe0.fixed_part_size;
+       i < g_frame.valid_node_count; ++i) {
+    const uint8_t *begin = data + address;
+    size_t data_length = (size_t)(begin[2] | begin[3] << 8);
+    size_t current_node_size = 4 + data_length;
+    if (address + current_node_size > frame_length - 1) {
+      printf(
+          "warning: address(%zu) + current_node_size(%zu) > "
+          "frame_length(%zu)-1",
+          address, current_node_size, frame_length);
+      return 0;
     }
 
-    memcpy(&frame_, data, nltNodeFrame0_.kFixedFrameLength);
-    nltNodeFrame0_.data.role = frame_.role;
-    nltNodeFrame0_.data.id = frame_.id;
-    nltNodeFrame0_.data.validNodeCount = frame_.validNodeCount;
+    TRY_MALLOC_NEW_NODE(g_nlt_nodeframe0.result.nodes[i], nlt_nodeframe0_node_t)
+    nlt_nodeframe0_node_t *node = g_nlt_nodeframe0.result.nodes[i];
+    node->role = begin[0];
+    node->id = begin[1];
+    node->data_length = data_length;
+    memcpy(node->data, begin + 2, data_length);
 
-    for(size_t i=0,address = nltNodeFrame0_.kFixedFrameLength;i<frame_.validNodeCount;++i){
-        const uint8_t *begin = data + address;
-        size_t dataLength = (size_t)(begin[2] | begin[3] << 8);
-        size_t currentNodeSize = 4 + dataLength;
-        if(address + currentNodeSize > frameLength-1){
-            printf("warning: address(%zu) + currentNodeSize(%zu) > frameLength(%zu)-1",address,currentNodeSize,frameLength);
-            return 0;
-        }
+    address += current_node_size;
+  }
 
-        if(!nltNodeFrame0_.data.node[i]){
-            nltNodeFrame0_.data.node[i] = malloc( sizeof(NLink_LinkTrack_Node0) );
-        }
-        memcpy(nltNodeFrame0_.data.node[i],begin,currentNodeSize);
-
-        address += currentNodeSize;
-    }
-
-    return 1;
+  return 1;
 }
 
-NLink_LinkTrack_NodeFrame0 nltNodeFrame0_ = {
-    .kFixedFrameLength = 11,
-    .kFrameHeader = 0x55,
-    .kFunctionMark = 0x02,
-    .unpackData = unpackData
-};
-
+nlt_nodeframe0_t g_nlt_nodeframe0 = {.fixed_part_size = 11,
+                                     .frame_header = 0x55,
+                                     .function_mark = 0x02,
+                                     .UnpackData = UnpackData};
