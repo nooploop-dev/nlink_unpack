@@ -26,7 +26,8 @@ nlt_anchorframe0_raw_t;
 
 static nlt_anchorframe0_raw_t g_frame;
 
-static uint8_t UnpackData(const uint8_t *data, size_t data_length) {
+static uint8_t UnpackData(const uint8_t *data, size_t data_length)
+{
   if (data_length < nlt_anchorframe0_.fixed_part_size ||
       data[0] != nlt_anchorframe0_.frame_header ||
       data[1] != nlt_anchorframe0_.function_mark ||
@@ -35,7 +36,8 @@ static uint8_t UnpackData(const uint8_t *data, size_t data_length) {
     return 0;
 
   static uint8_t init_needed = 1;
-  if (init_needed) {
+  if (init_needed)
+  {
     memset(nlt_anchorframe0_.result.nodes, 0,
            sizeof(nlt_anchorframe0_.result.nodes));
     init_needed = 0;
@@ -50,8 +52,10 @@ static uint8_t UnpackData(const uint8_t *data, size_t data_length) {
 
   nlt_anchorframe0_.result.valid_node_count = 0;
   for (size_t i = 0, count = ARRAY_LENGTH(nlt_anchorframe0_.result.nodes);
-       i < count; ++i) {
-    if (g_frame.nodes[i].id == 0xff) continue;
+       i < count; ++i)
+  {
+    if (g_frame.nodes[i].id == 0xff)
+      continue;
 
     uint8_t index = nlt_anchorframe0_.result.valid_node_count;
     TRY_MALLOC_NEW_NODE(nlt_anchorframe0_.result.nodes[index],

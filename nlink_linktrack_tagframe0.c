@@ -27,12 +27,14 @@ nlt_tagframe0_raw_t;
 
 static nlt_tagframe0_raw_t g_frame;
 
-static uint8_t UnpackData(const uint8_t *data, size_t data_length) {
+static uint8_t UnpackData(const uint8_t *data, size_t data_length)
+{
   if (data_length < g_nlt_tagframe0.fixed_part_size ||
       data[0] != g_nlt_tagframe0.frame_header ||
       data[1] != g_nlt_tagframe0.function_mark)
     return 0;
-  if (!NLINK_VerifyCheckSum(data, g_nlt_tagframe0.fixed_part_size)) return 0;
+  if (!NLINK_VerifyCheckSum(data, g_nlt_tagframe0.fixed_part_size))
+    return 0;
 
   memcpy(&g_frame, data, g_nlt_tagframe0.fixed_part_size);
   g_nlt_tagframe0.result.role = g_frame.role;
