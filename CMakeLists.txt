@@ -9,6 +9,11 @@ example.c
 nlink_utils.c
 nlink_linktrack_nodeframe0.c
 nlink_linktrack_nodeframe1.c
+nlink_linktrack_nodeframe2.c
+nlink_linktrack_nodeframe3.c
+nlink_linktrack_aoa_nodeframe0.c
+nlink_linktrack_tagframe0.c
+nlink_linktrack_anchorframe0.c
 nlink_tofsense_frame0.c
 )
 

@@ -2,7 +2,9 @@
 
 #include "nlink_utils.h"
 
-NLINK_PACKED(typedef struct {
+#pragma pack(1)
+typedef struct
+{
   uint8_t role;
   uint8_t id;
   nint24_t dis;
@@ -10,10 +12,10 @@ NLINK_PACKED(typedef struct {
   uint8_t fp_rssi;
   uint8_t rx_rssi;
   uint8_t reserved[2];
-})
-nltaoa_nodeframe0_node_raw_t;
+} nltaoa_nodeframe0_node_raw_t;
 
-NLINK_PACKED(typedef struct {
+typedef struct
+{
   uint8_t header[2];
   uint16_t frame_length;
   uint8_t role;
@@ -25,8 +27,8 @@ NLINK_PACKED(typedef struct {
   uint8_t valid_node_count;
   // nodes...
   // uint8_t checkSum;
-})
-nltaoa_nodeframe0_raw_t;
+} nltaoa_nodeframe0_raw_t;
+#pragma pack()
 
 static nltaoa_nodeframe0_raw_t g_frame;
 

@@ -4,19 +4,19 @@
 
 #include "nlink_utils.h"
 
-NLINK_PACKED(typedef struct
-             {
-               uint8_t header[2];
-               uint16_t frame_length;
-               uint8_t role;
-               uint8_t id;
-               uint8_t reserved[4];
-               uint8_t valid_node_count;
-               // nodes...
-               // uint8_t checkSum;
-             })
-nlt_nodeframe0_raw_t;
-
+#pragma pack(1)
+typedef struct
+{
+  uint8_t header[2];
+  uint16_t frame_length;
+  uint8_t role;
+  uint8_t id;
+  uint8_t reserved[4];
+  uint8_t valid_node_count;
+  // nodes...
+  // uint8_t checkSum;
+} nlt_nodeframe0_raw_t;
+#pragma pack()
 static nlt_nodeframe0_raw_t g_frame;
 
 uint8_t UnpackData(const uint8_t *data, size_t data_length)

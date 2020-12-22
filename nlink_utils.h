@@ -5,15 +5,17 @@ extern "C"
 {
 #endif
 #include "nlink_typedef.h"
-
+/*
 // Macro to define packed structures
 #ifndef _MSC_VER
-#define NLINK_PACKED(__Declaration__) __Declaration__ __attribute__((packed))
+#define #pragma pack(1)
+ __Declaration__) __Declaration__ __attribute__((packed))
 #else
-#define NLINK_PACKED(__Declaration__) \
-  __pragma(pack(push, 1)) __Declaration__ __pragma(pack(pop))
+#define #pragma pack(1)
+ __Declaration__) \
+    __pragma(pack(push, 1)) __Declaration__ __pragma(pack(pop))
 #endif
-
+*/
 #define ARRAY_LENGTH(X) (sizeof(X) / sizeof(X[0]))
 
 #define NLINK_PROTOCOL_LENGTH(X) ((size_t)(X[2] | X[3] << 8))
@@ -47,11 +49,17 @@ extern "C"
     }                                                                       \
   }
 
-  NLINK_PACKED(typedef struct { uint8_t byteArray[3]; })
-  nint24_t;
+#pragma pack(1)
+  typedef struct
+  {
+    uint8_t byteArray[3];
+  } nint24_t;
 
-  NLINK_PACKED(typedef struct { uint8_t byteArray[3]; })
-  nuint24_t;
+  typedef struct
+  {
+    uint8_t byteArray[3];
+  } nuint24_t;
+#pragma pack()
 
   int32_t NLINK_ParseInt24(nint24_t data);
 

@@ -3,16 +3,16 @@
 #include "nlink_tofsense_frame0.h"
 #include "nlink_utils.h"
 
-NLINK_PACKED(typedef struct
-             {
-               uint8_t a;
-               uint8_t b;
-               uint32_t c;
-               double d;
-               uint8_t e;
-             })
-pack_test_t;
-
+#pragma pack(1)
+typedef struct
+{
+  uint8_t a;
+  uint8_t b;
+  uint32_t c;
+  double d;
+  uint8_t e;
+} pack_test_t;
+#pragma pack()
 int main()
 {
   {
@@ -26,7 +26,7 @@ int main()
 
   if (sizeof(pack_test_t) != 15)
   {
-    printf("Error: Pack do not work, pack size:%d. Contact us for support", sizeof(pack_test_t));
+    printf("Error: Pack do not work, pack size:%zu. Contact us for support", sizeof(pack_test_t));
     return EXIT_FAILURE;
   }
 

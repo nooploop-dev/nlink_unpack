@@ -2,15 +2,17 @@
 
 #include "nlink_utils.h"
 
-NLINK_PACKED(typedef struct {
+#pragma pack(1)
+typedef struct
+{
   uint8_t id;
   uint8_t role;
   nint24_t pos_3d[3];
   uint16_t dis_arr[8];
-})
-nlt_anchorframe0_tag_raw_t;
+} nlt_anchorframe0_tag_raw_t;
 
-NLINK_PACKED(typedef struct {
+typedef struct
+{
   uint8_t header[2];
   nlt_anchorframe0_tag_raw_t nodes[30];
   uint8_t reserved0[67];
@@ -21,8 +23,8 @@ NLINK_PACKED(typedef struct {
   uint8_t id;
   uint8_t role;
   uint8_t tail_check;
-})
-nlt_anchorframe0_raw_t;
+} nlt_anchorframe0_raw_t;
+#pragma pack()
 
 static nlt_anchorframe0_raw_t g_frame;
 

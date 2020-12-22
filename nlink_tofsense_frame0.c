@@ -2,7 +2,9 @@
 
 #include "nlink_utils.h"
 
-NLINK_PACKED(typedef struct {
+#pragma pack(1)
+typedef struct
+{
   uint8_t header[2];
   uint8_t reserved0;
   uint8_t id;
@@ -12,8 +14,8 @@ NLINK_PACKED(typedef struct {
   uint16_t signal_strength;
   uint8_t reserved1;
   uint8_t check_sum;
-})
-nts_frame0_raw_t;
+} nts_frame0_raw_t;
+#pragma pack()
 
 static nts_frame0_raw_t g_frame;
 

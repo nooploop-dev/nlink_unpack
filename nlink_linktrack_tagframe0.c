@@ -2,7 +2,9 @@
 
 #include "nlink_utils.h"
 
-NLINK_PACKED(typedef struct {
+#pragma pack(1)
+typedef struct
+{
   uint8_t header[2];
   uint8_t id;
   uint8_t role;
@@ -22,8 +24,8 @@ NLINK_PACKED(typedef struct {
   uint16_t voltage;
   uint8_t reserved4[5];
   uint8_t check_sum;
-})
-nlt_tagframe0_raw_t;
+} nlt_tagframe0_raw_t;
+#pragma pack()
 
 static nlt_tagframe0_raw_t g_frame;
 
