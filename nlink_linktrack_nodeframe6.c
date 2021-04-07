@@ -15,9 +15,9 @@ typedef struct
   uint8_t valid_node_count;
   // nodes...
   // uint8_t checkSum;
-} nlt_nodeframe0_raw_t;
+} nlt_nodeframe6_raw_t;
 #pragma pack()
-static nlt_nodeframe0_raw_t g_frame;
+static nlt_nodeframe6_raw_t g_frame;
 
 static uint8_t UnpackData(const uint8_t *data, size_t data_length)
 {
@@ -44,13 +44,15 @@ static uint8_t UnpackData(const uint8_t *data, size_t data_length)
   g_nlt_nodeframe6.result.id = g_frame.id;
   g_nlt_nodeframe6.result.valid_node_count = g_frame.valid_node_count;
 
-  for (size_t i = 0, address = g_nlt_nodeframe6.fixed_part_size;
+  for (size_t i = 0, address = g_nlt_nodeframe6.fixed_part_size,
+              roleIdSize = 1 + sizeof(id_t);
        i < g_frame.valid_node_count; ++i)
   {
     const uint8_t *begin = data + address;
-    size_t data_length = (size_t)(begin[2] | begin[3] << 8);
+    size_t data_length =
+        (size_t)(begin[roleIdSize] | begin[roleIdSize + 1] << 8);
 
-    size_t current_node_size = 1 + sizeof(id_t) + 2 + data_length;
+    size_t current_node_size = roleIdSize + 2 + data_length;
     if (address + current_node_size > frame_length - 1)
     {
       printf("warning: address(%zu) + current_node_size(%zu) > "
@@ -64,7 +66,7 @@ static uint8_t UnpackData(const uint8_t *data, size_t data_length)
     node->role = begin[0];
     memcpy(&node->id, begin + 1, sizeof(node->id));
     node->data_length = data_length;
-    memcpy(node->data, begin + 1 + sizeof(id_t) + 2, data_length);
+    memcpy(node->data, begin + roleIdSize + 2, data_length);
 
     address += current_node_size;
   }
