@@ -21,6 +21,8 @@ extern "C"
     LINKTRACK_ROLE_MONITOR,
   } linktrack_role_e;
 
+  typedef uint32_t id_t;
+
 #ifdef __cplusplus
 }
 #endif
