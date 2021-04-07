@@ -52,10 +52,9 @@ static uint8_t UnpackData(const uint8_t *data, size_t data_length)
     size_t current_node_size = 4 + data_length;
     if (address + current_node_size > frame_length - 1)
     {
-      printf(
-          "warning: address(%zu) + current_node_size(%zu) > "
-          "frame_length(%zu)-1",
-          address, current_node_size, frame_length);
+      printf("warning: address(%zu) + current_node_size(%zu) > "
+             "frame_length(%zu)-1",
+             address, current_node_size, frame_length);
       return 0;
     }
 

@@ -26,7 +26,8 @@ int main()
 
   if (sizeof(pack_test_t) != 15)
   {
-    printf("Error: Pack do not work, pack size:%zu. Contact us for support", sizeof(pack_test_t));
+    printf("Error: Pack do not work, pack size:%zu. Contact us for support",
+           sizeof(pack_test_t));
     return EXIT_FAILURE;
   }
 

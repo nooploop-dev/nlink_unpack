@@ -20,33 +20,32 @@ extern "C"
 
 #define NLINK_PROTOCOL_LENGTH(X) ((size_t)(X[2] | X[3] << 8))
 
-#define NLINK_TRANSFORM_ARRAY(DEST, SRC, MULTIPLY)                   \
-  for (size_t _CNT = 0; _CNT < sizeof(SRC) / sizeof(SRC[0]); ++_CNT) \
-  {                                                                  \
-    DEST[_CNT] = SRC[_CNT] / MULTIPLY;                               \
+#define NLINK_TRANSFORM_ARRAY(DEST, SRC, MULTIPLY)                             \
+  for (size_t _CNT = 0; _CNT < sizeof(SRC) / sizeof(SRC[0]); ++_CNT)           \
+  {                                                                            \
+    DEST[_CNT] = SRC[_CNT] / MULTIPLY;                                         \
   }
 
-#define NLINK_TRANSFORM_ARRAY_INT24(DEST, SRC, MULTIPLY)             \
-  for (size_t _CNT = 0; _CNT < sizeof(SRC) / sizeof(SRC[0]); ++_CNT) \
-  {                                                                  \
-    DEST[_CNT] = NLINK_ParseInt24(SRC[_CNT]) / MULTIPLY;             \
+#define NLINK_TRANSFORM_ARRAY_INT24(DEST, SRC, MULTIPLY)                       \
+  for (size_t _CNT = 0; _CNT < sizeof(SRC) / sizeof(SRC[0]); ++_CNT)           \
+  {                                                                            \
+    DEST[_CNT] = NLINK_ParseInt24(SRC[_CNT]) / MULTIPLY;                       \
   }
 
-#define TRY_MALLOC_NEW_NODE(NODE_POINTER, NODE_TYPE)                        \
-  if (!NODE_POINTER)                                                        \
-  {                                                                         \
-    void *p = malloc(sizeof(NODE_TYPE));                                    \
-    if (p != NULL)                                                          \
-    {                                                                       \
-      NODE_POINTER = (NODE_TYPE *)p;                                        \
-    }                                                                       \
-    else                                                                    \
-    {                                                                       \
-      printf(                                                               \
-          "Memory allocation failed, please increase heap size to support " \
-          "protocol unpack.\r\n");                                          \
-      return 0;                                                             \
-    }                                                                       \
+#define TRY_MALLOC_NEW_NODE(NODE_POINTER, NODE_TYPE)                           \
+  if (!NODE_POINTER)                                                           \
+  {                                                                            \
+    void *p = malloc(sizeof(NODE_TYPE));                                       \
+    if (p != NULL)                                                             \
+    {                                                                          \
+      NODE_POINTER = (NODE_TYPE *)p;                                           \
+    }                                                                          \
+    else                                                                       \
+    {                                                                          \
+      printf("Memory allocation failed, please increase heap size to support " \
+             "protocol unpack.\r\n");                                          \
+      return 0;                                                                \
+    }                                                                          \
   }
 
 #pragma pack(1)
