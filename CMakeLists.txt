@@ -4,18 +4,19 @@ project(nlink_unpack VERSION 0.1.0)
 include(CTest)
 enable_testing()
 
-add_executable(nlink_unpack 
-example.c
-nlink_utils.c
-nlink_linktrack_nodeframe0.c
-nlink_linktrack_nodeframe1.c
-nlink_linktrack_nodeframe2.c
-nlink_linktrack_nodeframe3.c
-nlink_linktrack_aoa_nodeframe0.c
-nlink_linktrack_tagframe0.c
-nlink_linktrack_anchorframe0.c
-nlink_tofsense_frame0.c
-)
+add_executable(
+  nlink_unpack
+  example.c
+  nlink_utils.c
+  nlink_linktrack_nodeframe0.c
+  nlink_linktrack_nodeframe1.c
+  nlink_linktrack_nodeframe2.c
+  nlink_linktrack_nodeframe3.c
+  nlink_linktrack_aoa_nodeframe0.c
+  nlink_linktrack_tagframe0.c
+  nlink_linktrack_anchorframe0.c
+  nlink_tofsense_frame0.c
+  nlink_tofsensem_frame0.c)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
