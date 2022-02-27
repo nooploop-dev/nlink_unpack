@@ -8,7 +8,6 @@ extern "C"
 
   typedef struct
   {
-
     float dis;
     uint8_t dis_status;
     uint16_t signal_strength;
@@ -27,6 +26,8 @@ extern "C"
   } ntsm_frame0_t;
 
   extern ntsm_frame0_t g_ntsm_frame0;
+
+  int tofm_frame0_size(const void *data);
 
 #ifdef __cplusplus
 }

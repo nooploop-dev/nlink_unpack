@@ -24,6 +24,11 @@ typedef struct
 } ntsm_frame0_raw_t;
 #pragma pack()
 
+int tofm_frame0_size(const void *data){
+  const ntsm_frame0_raw_t *raw = (const ntsm_frame0_raw_t *)data;
+  return sizeof(*raw) - sizeof(raw->pixels) + sizeof(raw->pixels[0]) * raw->pixel_count;
+}
+
 static uint8_t UnpackData(const uint8_t *data, size_t data_length)
 {
   const ntsm_frame0_raw_t *frame0 = (const ntsm_frame0_raw_t *)data;
@@ -39,9 +44,7 @@ static uint8_t UnpackData(const uint8_t *data, size_t data_length)
     return 0;
   }
 
-  if (g_ntsm_frame0.fixed_part_size +
-          frame0->pixel_count * sizeof(ntsm_frame0_pixel_raw_t) !=
-      data_length)
+  if (tofm_frame0_size(data) != data_length)
   {
     return 0;
   }
@@ -64,7 +67,7 @@ static uint8_t UnpackData(const uint8_t *data, size_t data_length)
   return 1;
 }
 
-ntsm_frame0_t g_ntsm_frame0 = {.fixed_part_size = 16,
+ntsm_frame0_t g_ntsm_frame0 = {.fixed_part_size = 9,
                                .frame_header = 0x57,
                                .function_mark = 0x01,
                                .UnpackData = UnpackData};
