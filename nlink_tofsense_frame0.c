@@ -12,7 +12,7 @@ typedef struct
   nint24_t dis;
   uint8_t dis_status;
   uint16_t signal_strength;
-  uint8_t reserved1;
+  uint8_t range_precision;
   uint8_t check_sum;
 } nts_frame0_raw_t;
 #pragma pack()
@@ -33,6 +33,7 @@ static uint8_t UnpackData(const uint8_t *data, size_t data_length)
   g_nts_frame0.result.system_time = g_frame.system_time;
   g_nts_frame0.result.dis_status = g_frame.dis_status;
   g_nts_frame0.result.signal_strength = g_frame.signal_strength;
+  g_nts_frame0.result.range_precision = g_frame.range_precision;
   g_nts_frame0.result.dis = NLINK_ParseInt24(g_frame.dis) / 1000.0f;
 
   return 1;

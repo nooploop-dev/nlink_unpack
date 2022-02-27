@@ -13,6 +13,7 @@ extern "C"
     float dis;
     uint8_t dis_status;
     uint16_t signal_strength;
+    uint8_t range_precision;//cm, only valid in tofsense-f
   } nts_frame0_result_t;
 
   typedef struct
