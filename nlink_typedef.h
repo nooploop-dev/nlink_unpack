@@ -23,6 +23,9 @@ extern "C"
 
   typedef uint32_t id_t;
 
+  #define MAX_ANCHOR_COUNT 16
+  #define MAX_TAG_COUNT 16
+
 #ifdef __cplusplus
 }
 #endif

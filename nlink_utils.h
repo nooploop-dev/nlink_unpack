@@ -39,6 +39,7 @@ extern "C"
     if (p != NULL)                                                             \
     {                                                                          \
       NODE_POINTER = (NODE_TYPE *)p;                                           \
+      memset(p,0,sizeof(NODE_TYPE));                                           \
     }                                                                          \
     else                                                                       \
     {                                                                          \
