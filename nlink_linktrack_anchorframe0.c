@@ -3,16 +3,14 @@
 #include "nlink_utils.h"
 
 #pragma pack(1)
-typedef struct
-{
+typedef struct {
   uint8_t id;
   uint8_t role;
   nint24_t pos_3d[3];
   uint16_t dis_arr[8];
 } nlt_anchorframe0_tag_raw_t;
 
-typedef struct
-{
+typedef struct {
   uint8_t header[2];
   nlt_anchorframe0_tag_raw_t nodes[30];
   uint8_t reserved0[67];
@@ -28,8 +26,7 @@ typedef struct
 
 static nlt_anchorframe0_raw_t g_frame;
 
-static uint8_t UnpackData(const uint8_t *data, size_t data_length)
-{
+static uint8_t UnpackData(const uint8_t *data, size_t data_length) {
   if (data_length < nlt_anchorframe0_.fixed_part_size ||
       data[0] != nlt_anchorframe0_.frame_header ||
       data[1] != nlt_anchorframe0_.function_mark ||
@@ -38,8 +35,7 @@ static uint8_t UnpackData(const uint8_t *data, size_t data_length)
     return 0;
 
   static uint8_t init_needed = 1;
-  if (init_needed)
-  {
+  if (init_needed) {
     memset(nlt_anchorframe0_.result.nodes, 0,
            sizeof(nlt_anchorframe0_.result.nodes));
     init_needed = 0;
@@ -54,8 +50,7 @@ static uint8_t UnpackData(const uint8_t *data, size_t data_length)
 
   nlt_anchorframe0_.result.valid_node_count = 0;
   for (size_t i = 0, count = ARRAY_LENGTH(nlt_anchorframe0_.result.nodes);
-       i < count; ++i)
-  {
+       i < count; ++i) {
     if (g_frame.nodes[i].id == 0xff)
       continue;
 

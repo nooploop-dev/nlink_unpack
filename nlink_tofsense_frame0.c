@@ -3,8 +3,7 @@
 #include "nlink_utils.h"
 
 #pragma pack(1)
-typedef struct
-{
+typedef struct {
   uint8_t header[2];
   uint8_t reserved0;
   uint8_t id;
@@ -19,8 +18,7 @@ typedef struct
 
 static nts_frame0_raw_t g_frame;
 
-static uint8_t UnpackData(const uint8_t *data, size_t data_length)
-{
+static uint8_t UnpackData(const uint8_t *data, size_t data_length) {
   if (data_length < g_nts_frame0.fixed_part_size ||
       data[0] != g_nts_frame0.frame_header ||
       data[1] != g_nts_frame0.function_mark)
